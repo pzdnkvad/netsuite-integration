@@ -18,9 +18,9 @@ public class NetSuiteRoute extends RouteBuilder {
 
     @Autowired
     public NetSuiteRoute(NetsuiteConfig config) {
-//        this.account = config.getAccount();
         this.config = config;
     }
+
 
     @Override
     public void configure() throws Exception {
@@ -55,7 +55,7 @@ public class NetSuiteRoute extends RouteBuilder {
                     exchange.getIn().setHeader("SOAPAction", "search");
                     exchange.getIn().setBody(soapBody);
                 })
-                .to("http4://" + config.getEndpointUrl())
+                .to(config.getEndpointUrl())
                 .log("Response: ${body}")
                 .delay(100)
                 .process(exchange -> exchange.getContext().getRouteController().stopRoute("singleRunRoute"));
@@ -64,7 +64,8 @@ public class NetSuiteRoute extends RouteBuilder {
 
     private String generateNonce() {
         int length = new Random().nextInt(59) + 6; // length between 6 and 64
-        return UUID.randomUUID().toString().replaceAll("-", "").substring(0, length);
+        String uuid = UUID.randomUUID().toString().replaceAll("-", "");
+        return uuid.substring(0, Math.min(length, uuid.length()));
     }
 
     private String generateSignature(String account, String consumerKey, String consumerSecret, String tokenKey, String tokenSecret, String nonce, String timestamp) {
@@ -113,7 +114,7 @@ public class NetSuiteRoute extends RouteBuilder {
                 "   <search xmlns=\"urn:messages_2022_2.platform.webservices.netsuite.com\">\n" +
                 "     <searchRecord xsi:type=\"ns1:TransactionSearchBasic\" xmlns:ns1=\"urn:common_2022_2.platform.webservices.netsuite.com\">\n" +
                 "       <ns1:type operator=\"anyOf\" xsi:type=\"ns2:SearchEnumMultiSelectField\" xmlns:ns2=\"urn:core_2022_2.platform.webservices.netsuite.com\">\n" +
-                "         <ns2:searchValue xsi:type=\"xsd:string\">invoice</ns2:searchValue>\n" +
+                "         <ns2:searchValue xsi:type=\"xsd:string\">account</ns2:searchValue>\n" +
                 "       </ns1:type>\n" +
                 "     </searchRecord>\n" +
                 "   </search>\n" +

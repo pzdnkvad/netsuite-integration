@@ -1,21 +1,34 @@
 package com.vse.bp.netsuite_integration.config;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@Component
+@Configuration  // ✅ Говорим Spring, что это конфигурационный бин
+@ConfigurationProperties(prefix = "netsuite")  // ✅ Загружаем свойства с префиксом "netsuite"
 public class NetsuiteConfig {
-    @Value("${netsuite.account}") private String account;
-    @Value("${netsuite.consumerKey}") private String consumerKey;
-    @Value("${netsuite.consumerSecret}") private String consumerSecret;
-    @Value("${netsuite.token}") private String token;
-    @Value("${netsuite.tokenSecret}") private String tokenSecret;
-    @Value("${netsuite.endpointUrl}") private String endpointUrl;
+    private String account;
+    private String consumerKey;
+    private String consumerSecret;
+    private String token;
+    private String tokenSecret;
+    private String endpointUrl;
 
+    // Геттеры и сеттеры
     public String getAccount() { return account; }
+    public void setAccount(String account) { this.account = account; }
+
     public String getConsumerKey() { return consumerKey; }
+    public void setConsumerKey(String consumerKey) { this.consumerKey = consumerKey; }
+
     public String getConsumerSecret() { return consumerSecret; }
+    public void setConsumerSecret(String consumerSecret) { this.consumerSecret = consumerSecret; }
+
     public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
+
     public String getTokenSecret() { return tokenSecret; }
+    public void setTokenSecret(String tokenSecret) { this.tokenSecret = tokenSecret; }
+
     public String getEndpointUrl() { return endpointUrl; }
+    public void setEndpointUrl(String endpointUrl) { this.endpointUrl = endpointUrl; }
 }
