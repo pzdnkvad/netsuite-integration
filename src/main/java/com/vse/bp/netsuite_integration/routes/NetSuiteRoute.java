@@ -1,6 +1,8 @@
 package com.vse.bp.netsuite_integration.routes;
 
 import com.vse.bp.netsuite_integration.config.NetsuiteConfig;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Counter;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,18 +17,27 @@ import java.util.UUID;
 @Component
 public class NetSuiteRoute extends RouteBuilder {
     private final NetsuiteConfig config;
+    private final MeterRegistry meterRegistry;
 
     @Autowired
-    public NetSuiteRoute(NetsuiteConfig config) {
+    public NetSuiteRoute(NetsuiteConfig config, MeterRegistry meterRegistry) {
         this.config = config;
+        this.meterRegistry = meterRegistry;
     }
+
 
 
     @Override
     public void configure() throws Exception {
+
+        Counter netsuiteCounter = Counter.builder("netsuite.requests.total")
+                .description("Number of requests sent to NetSuite")
+                .register(meterRegistry);
+
         from("timer:first-timer?repeatCount=1")
                 .routeId("singleRunRoute")
                 .process(exchange -> {
+                    netsuiteCounter.increment();
                     String nonce = generateNonce();
                     String timestamp = String.valueOf(System.currentTimeMillis() / 1000L);
                     String signature = generateSignature(
@@ -39,7 +50,7 @@ public class NetSuiteRoute extends RouteBuilder {
                             timestamp
                     );
 
-                    log.info("Generated Signature: {}", signature);
+                    //log.info("Generated Signature: {}", signature);
 
                     String soapBody = generateSoapBody(
                             config.getAccount(),
@@ -49,13 +60,15 @@ public class NetSuiteRoute extends RouteBuilder {
                             timestamp,
                             signature
                     );
-                    log.info("Generated SOAP Request: \n{}", soapBody);
+                    //log.info("Generated SOAP Request: \n{}", soapBody);
 
                     exchange.getIn().setHeader("Content-Type", "text/xml; charset=utf-8");
                     exchange.getIn().setHeader("SOAPAction", "search");
                     exchange.getIn().setBody(soapBody);
                 })
+                .to("micrometer:timer:netsuite.request.duration?action=start")
                 .to(config.getEndpointUrl())
+                .to("micrometer:timer:netsuite.request.duration?action=stop")
                 .log("Response: ${body}")
                 .delay(100)
                 .process(exchange -> exchange.getContext().getRouteController().stopRoute("singleRunRoute"));
