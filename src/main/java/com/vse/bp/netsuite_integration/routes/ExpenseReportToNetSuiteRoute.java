@@ -24,6 +24,7 @@ public class ExpenseReportToNetSuiteRoute extends RouteBuilder {
     public void configure() throws Exception {
         JacksonDataFormat jsonFormat = new JacksonDataFormat(ExpenseReportFlat.class);
 
+        // Error handling: send email when NetSuite call fails
         onException(HttpOperationFailedException.class)
                 .handled(true)
                 .process(exchange -> {
@@ -36,6 +37,7 @@ public class ExpenseReportToNetSuiteRoute extends RouteBuilder {
                 .setHeader("subject", constant("NetSuite Expense Report Error"))
                 .to("smtp://{{mail.host}}?to={{mail.to}}&from={{mail.from}}&username={{mail.username}}&password={{mail.password}}&contentType=text/plain");
 
+        // Main route
         from("timer:fetchExpenseReport?period=60000")
                 .routeId("expenseReportToNetSuiteRoute")
                 .to(config.getApiUrl())
@@ -71,11 +73,18 @@ public class ExpenseReportToNetSuiteRoute extends RouteBuilder {
                     exchange.getIn().setHeader("SOAPAction", "add");
                     exchange.getIn().setBody(soapRequest);
                 })
-                .to(config.getEndpointUrl());
+                .to(config.getEndpointUrl())
+                .wireTap("direct:auditTap");
+
+        // Audit route - wire tap to send audit information
+        from("direct:auditTap")
+                .routeId("auditTapRoute")
+                .setHeader(Exchange.HTTP_METHOD, constant("POST"))
+                .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+                .to("http4://audit-service.local/api/audit");
     }
 
     private String generateNonce() {
-        // length between 6 and 64
         String uuid = java.util.UUID.randomUUID().toString().replaceAll("-", "");
         int length = Math.min(64, Math.max(6, uuid.length()));
         return uuid.substring(0, length);
