@@ -12,23 +12,61 @@ public class NetsuiteConfig {
     private String token;
     private String tokenSecret;
     private String endpointUrl;
+    private String apiUrl;
 
     // Геттеры и сеттеры
-    public String getAccount() { return account; }
-    public void setAccount(String account) { this.account = account; }
+    public String getAccount() {
+        return account;
+    }
 
-    public String getConsumerKey() { return consumerKey; }
-    public void setConsumerKey(String consumerKey) { this.consumerKey = consumerKey; }
+    public void setAccount(String account) {
+        this.account = account;
+    }
 
-    public String getConsumerSecret() { return consumerSecret; }
-    public void setConsumerSecret(String consumerSecret) { this.consumerSecret = consumerSecret; }
+    public String getConsumerKey() {
+        return consumerKey;
+    }
 
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public void setConsumerKey(String consumerKey) {
+        this.consumerKey = consumerKey;
+    }
 
-    public String getTokenSecret() { return tokenSecret; }
-    public void setTokenSecret(String tokenSecret) { this.tokenSecret = tokenSecret; }
+    public String getConsumerSecret() {
+        return consumerSecret;
+    }
 
-    public String getEndpointUrl() { return endpointUrl; }
-    public void setEndpointUrl(String endpointUrl) { this.endpointUrl = endpointUrl; }
+    public void setConsumerSecret(String consumerSecret) {
+        this.consumerSecret = consumerSecret;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
+
+    public String getTokenSecret() {
+        return tokenSecret;
+    }
+
+    public void setTokenSecret(String tokenSecret) {
+        this.tokenSecret = tokenSecret;
+    }
+
+    public String getEndpointUrl() {
+        return endpointUrl;
+    }
+
+    public void setEndpointUrl(String endpointUrl) {
+        this.endpointUrl = endpointUrl;
+    }
+
+    public String getApiUrl() {
+        return apiUrl;
+    }
+    public void setApiUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
 }
